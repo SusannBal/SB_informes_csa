@@ -1,0 +1,43 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Datos de estudiantes: nunca al repositorio
+*.pdf
+*.csv
+*.xlsx
+*.json
+!package.json
+!package-lock.json
+!.oxlintrc.json
+!.claude/launch.json
+scripts/salida/
+
+# Variables de entorno: la URL y la clave publicable de Supabase van acá,
+# nunca committeadas (aunque la clave publicable es segura de exponer en el
+# navegador, el archivo .env no se sube — se configuran como variables de
+# entorno en el hosting o en GitHub Actions secrets).
+.env
+.env.local
+.env.*.local
