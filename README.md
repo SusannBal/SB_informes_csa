@@ -5,7 +5,7 @@ remdiz, sin copiar números a mano.
 
 ```bash
 npm install
-cp .env.example .env   # completá los dos valores, ver "Acceso" más abajo
+cp .env.example .env   # completá VITE_APP_PASSWORD_HASH, ver "Acceso" más abajo
 npm run dev
 ```
 
@@ -63,47 +63,58 @@ bordes quedan intactos. Para regenerarlas desde los originales:
 python scripts/prepararPlantillas.py <carpeta con los Word>
 ```
 
-## Acceso (cuenta de prueba)
+## Acceso (contraseña de prueba)
 
 Mientras no existe el login definitivo (uno por profesor), la app queda detrás
-de una única cuenta de prueba en Supabase — **Supabase se usa sólo para esto**:
-no hay ninguna tabla, y el generador de informes sigue funcionando exactamente
-igual que antes (100% local, nada se sube).
+de una única contraseña de prueba — **sin ningún servicio externo**: no hay
+Supabase, ni cuentas, ni base de datos de por medio. El generador de informes
+sigue funcionando exactamente igual que antes (100% local, nada se sube). La
+contraseña se compara por huella SHA-256, así que no queda escrita tal cual en
+el código que se publica.
 
-1. En el panel de Supabase: **Authentication → Users → Add user**, con un
-   correo y una contraseña. Esa es la cuenta que se comparte con quien tenga
-   que entrar a probar.
-2. En **Project Settings → API** copiá la **Project URL** y la **clave
-   publicable** ("Publishable key" — es la que Supabase dice que es segura de
-   exponer en el navegador).
-3. Completá `.env` (local) o los *secrets* del repositorio (para el deploy,
-   ver abajo) con esos dos valores:
+1. Elegí una contraseña y generá su huella:
 
-   ```
-   VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
-   VITE_SUPABASE_ANON_KEY=sb_publishable_...
+   ```bash
+   node scripts/hashearClave.mjs "la-contraseña-que-elijas"
    ```
 
-Si algún día hace falta revocar el acceso, se borra o se cambia la contraseña
-de ese usuario en el mismo panel — no hay que tocar código.
+2. Completá `.env` (local) o el *secret* del repositorio (para el deploy, ver
+   abajo) con esa huella:
 
-## Desplegar (GitHub Pages, gratis)
+   ```
+   VITE_APP_PASSWORD_HASH=<lo que imprimió el comando de arriba>
+   ```
 
-El repositorio ya trae el workflow (`.github/workflows/deploy.yml`): cada
-`push` a `main` compila el sitio y lo publica en GitHub Pages. Dos pasos
-únicos, la primera vez:
+Para cambiar la contraseña más adelante, se genera una huella nueva y se
+reemplaza el valor — no hay que tocar el resto del código.
 
-1. **Settings → Pages → Build and deployment → Source: "GitHub Actions"**.
-2. **Settings → Secrets and variables → Actions → New repository secret**,
-   una vez por cada valor:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
+> Esto **no es seguridad de verdad**: quien tenga algo de conocimiento técnico
+> puede saltear esta pantalla mirando el código publicado. Alcanza para que un
+> visitante casual no entre; no alcanza para proteger datos sensibles — por
+> eso el generador de informes nunca sube nada a ningún lado, con o sin esta
+> pantalla.
 
-Después de eso, cualquier `push` a `main` despliega solo. La URL queda en
-Settings → Pages una vez que corre el primer deploy.
+## Desplegar (Netlify, gratis)
+
+El repositorio ya trae `netlify.toml` con el comando de build (`npm run
+build`) y la carpeta a publicar (`dist`), así que Netlify los detecta solo.
+Pasos únicos, la primera vez:
+
+1. En [app.netlify.com](https://app.netlify.com): **Add new site → Import an
+   existing project → GitHub** y elegí `SusannBal/SB_informes_csa`.
+2. Netlify va a proponer el build command y el publish directory ya
+   completos (los toma de `netlify.toml`) — no hace falta tocarlos.
+3. Antes de desplegar (o después, en **Site configuration → Environment
+   variables → Add a variable**): agregá
+   - `VITE_APP_PASSWORD_HASH` (la huella del paso anterior).
+4. **Deploy site**.
+
+Después de eso, cualquier `push` a `main` despliega solo. La URL la asigna
+Netlify (`algo.netlify.app`) y se puede cambiar por una propia desde **Site
+configuration → Domain management**.
 
 ## Privacidad
 
-No hay servidor propio, ni base de datos de informes, ni analytics. El
-repositorio no contiene datos reales: `.gitignore` excluye `.pdf`, `.csv`,
-`.xlsx`, los `.json` de datos y el `.env` con las claves de Supabase.
+No hay servidor propio, ni base de datos, ni analytics, ni ningún servicio
+externo (ni siquiera para el acceso). El repositorio no contiene datos reales:
+`.gitignore` excluye `.pdf`, `.csv`, `.xlsx`, los `.json` de datos y el `.env`.

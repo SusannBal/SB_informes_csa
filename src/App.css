@@ -331,6 +331,15 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-col
   color: var(--text-secondary);
 }
 
+.glass-panel pre {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+
 .btn-cerrar-sesion {
   position: fixed;
   bottom: 1rem;

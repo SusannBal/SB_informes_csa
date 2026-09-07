@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.115.0",
     "docxtemplater": "^3.69.3",
     "file-saver": "^2.0.5",
     "pdfjs-dist": "^6.3.289",
