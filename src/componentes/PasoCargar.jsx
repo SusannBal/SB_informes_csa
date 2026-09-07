@@ -161,6 +161,15 @@ export default function PasoCargar({ modo, varios, trimestre, setTrimestre, arch
         <button className="btn-primary" disabled={!listo} onClick={avanzar}>
           Revisar los datos →
         </button>
+        {!listo && (
+          <span className="aviso-inline">
+            {trimestre === null
+              ? "Falta elegir el trimestre, arriba."
+              : archivos.length === 0
+                ? "Falta cargar un centralizador."
+                : "Falta indicar el curso de algún archivo."}
+          </span>
+        )}
       </div>
     </div>
   );

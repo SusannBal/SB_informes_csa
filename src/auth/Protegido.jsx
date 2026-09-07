@@ -77,7 +77,10 @@ export default function Protegido({ children }) {
       <main>
         <form className="glass-panel login-panel" onSubmit={entrar}>
           <h2>Ingresar</h2>
-          <p className="ayuda">Usá el usuario y la contraseña de prueba que te compartieron.</p>
+
+          <div className="credenciales-prueba">
+            Usuario: <strong>{usuarioEsperado}</strong> · Contraseña: <strong>{claveEsperada}</strong>
+          </div>
 
           <label>
             Usuario
@@ -91,7 +94,7 @@ export default function Protegido({ children }) {
           <label>
             Contraseña
             <input
-              type="password"
+              type="text"
               autoComplete="current-password"
               value={clave}
               onChange={e => setClave(e.target.value)}
