@@ -5,7 +5,7 @@ remdiz, sin copiar números a mano.
 
 ```bash
 npm install
-cp .env.example .env   # completá VITE_APP_PASSWORD_HASH, ver "Acceso" más abajo
+cp .env.example .env   # completá VITE_APP_USER y VITE_APP_PASSWORD, ver "Acceso" más abajo
 npm run dev
 ```
 
@@ -63,36 +63,30 @@ bordes quedan intactos. Para regenerarlas desde los originales:
 python scripts/prepararPlantillas.py <carpeta con los Word>
 ```
 
-## Acceso (contraseña de prueba)
+## Acceso (usuario y contraseña de prueba)
 
 Mientras no existe el login definitivo (uno por profesor), la app queda detrás
-de una única contraseña de prueba — **sin ningún servicio externo**: no hay
-Supabase, ni cuentas, ni base de datos de por medio. El generador de informes
-sigue funcionando exactamente igual que antes (100% local, nada se sube). La
-contraseña se compara por huella SHA-256, así que no queda escrita tal cual en
-el código que se publica.
+de un usuario y contraseña fijos, de prueba — **sin ningún servicio
+externo**: no hay Supabase, ni cuentas, ni base de datos de por medio. El
+generador de informes sigue funcionando exactamente igual que antes (100%
+local, nada se sube).
 
-1. Elegí una contraseña y generá su huella:
-
-   ```bash
-   node scripts/hashearClave.mjs "la-contraseña-que-elijas"
-   ```
-
-2. Completá `.env` (local) o el *secret* del repositorio (para el deploy, ver
-   abajo) con esa huella:
+1. Completá `.env` (local) o los *secrets* del repositorio (para el deploy,
+   ver abajo) con el usuario y la contraseña que quieras compartir:
 
    ```
-   VITE_APP_PASSWORD_HASH=<lo que imprimió el comando de arriba>
+   VITE_APP_USER=prueba
+   VITE_APP_PASSWORD=123
    ```
 
-Para cambiar la contraseña más adelante, se genera una huella nueva y se
-reemplaza el valor — no hay que tocar el resto del código.
+2. Compartilos con quien tenga que probar la app. Para cambiarlos más
+   adelante, se reemplazan esos dos valores — no hay que tocar código.
 
-> Esto **no es seguridad de verdad**: quien tenga algo de conocimiento técnico
-> puede saltear esta pantalla mirando el código publicado. Alcanza para que un
-> visitante casual no entre; no alcanza para proteger datos sensibles — por
-> eso el generador de informes nunca sube nada a ningún lado, con o sin esta
-> pantalla.
+> Esto **no es seguridad de verdad**: son un usuario y una contraseña fijos,
+> visibles para cualquiera que revise la configuración del sitio. Alcanza
+> para que un visitante casual no entre; no alcanza para proteger datos
+> sensibles — por eso el generador de informes nunca sube nada a ningún lado,
+> con o sin esta pantalla.
 
 ## Desplegar (Netlify, gratis)
 
@@ -106,7 +100,8 @@ Pasos únicos, la primera vez:
    completos (los toma de `netlify.toml`) — no hace falta tocarlos.
 3. Antes de desplegar (o después, en **Site configuration → Environment
    variables → Add a variable**): agregá
-   - `VITE_APP_PASSWORD_HASH` (la huella del paso anterior).
+   - `VITE_APP_USER`
+   - `VITE_APP_PASSWORD`
 4. **Deploy site**.
 
 Después de eso, cualquier `push` a `main` despliega solo. La URL la asigna

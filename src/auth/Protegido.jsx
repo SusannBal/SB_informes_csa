@@ -2,15 +2,9 @@ import { useState } from "react";
 
 const CLAVE_ALMACENADA = "informes_acceso_ok";
 
-async function sha256Hex(texto) {
-  const datos = new TextEncoder().encode(texto);
-  const hash = await crypto.subtle.digest("SHA-256", datos);
-  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
 /**
- * Puerta de entrada simple, sin ningún servicio externo: una única
- * contraseña de prueba, compartida con quien tenga que probar la app.
+ * Puerta de entrada simple, sin ningún servicio externo: un usuario y una
+ * contraseña de prueba fijos, compartidos con quien tenga que probar la app.
  *
  * No es el login definitivo (uno por profesor) ni pretende ser seguridad de
  * verdad — es sólo una traba liviana antes de armar eso. Cualquiera con algo
@@ -18,20 +12,20 @@ async function sha256Hex(texto) {
  * para que un visitante casual no entre, no para proteger datos sensibles.
  * (Por suerte no hay datos sensibles del otro lado: el generador de informes
  * sigue siendo 100% local, nada se sube a ningún lado.)
- *
- * La contraseña no queda en texto plano en el código: se compara la huella
- * SHA-256 de lo que se escribe contra VITE_APP_PASSWORD_HASH.
  */
 export default function Protegido({ children }) {
-  const hashEsperado = import.meta.env.VITE_APP_PASSWORD_HASH;
+  const usuarioEsperado = import.meta.env.VITE_APP_USER;
+  const claveEsperada = import.meta.env.VITE_APP_PASSWORD;
+  const configurado = Boolean(usuarioEsperado && claveEsperada);
+
   const [desbloqueado, setDesbloqueado] = useState(
-    () => Boolean(hashEsperado) && localStorage.getItem(CLAVE_ALMACENADA) === hashEsperado
+    () => configurado && localStorage.getItem(CLAVE_ALMACENADA) === "1"
   );
+  const [usuario, setUsuario] = useState("");
   const [clave, setClave] = useState("");
   const [error, setError] = useState(null);
-  const [verificando, setVerificando] = useState(false);
 
-  if (!hashEsperado) {
+  if (!configurado) {
     return (
       <div className="app-container">
         <header><h1>Generador de informes</h1></header>
@@ -39,10 +33,11 @@ export default function Protegido({ children }) {
           <div className="glass-panel">
             <h2>Falta configurar el acceso</h2>
             <p className="ayuda">
-              No está definida <code>VITE_APP_PASSWORD_HASH</code>. Copiá{" "}
-              <code>.env.example</code> a <code>.env</code> y generá una huella con:
+              No están definidas <code>VITE_APP_USER</code> y{" "}
+              <code>VITE_APP_PASSWORD</code>. Copiá <code>.env.example</code> a{" "}
+              <code>.env</code> y completá las dos, con el usuario y la
+              contraseña que quieras compartir.
             </p>
-            <pre>node scripts/hashearClave.mjs "tu-contraseña"</pre>
           </div>
         </main>
       </div>
@@ -63,17 +58,13 @@ export default function Protegido({ children }) {
     );
   }
 
-  const entrar = async (evento) => {
+  const entrar = (evento) => {
     evento.preventDefault();
-    setVerificando(true);
-    setError(null);
-    const huella = await sha256Hex(clave);
-    setVerificando(false);
-    if (huella === hashEsperado) {
-      localStorage.setItem(CLAVE_ALMACENADA, huella);
+    if (usuario === usuarioEsperado && clave === claveEsperada) {
+      localStorage.setItem(CLAVE_ALMACENADA, "1");
       setDesbloqueado(true);
     } else {
-      setError("Contraseña incorrecta.");
+      setError("Usuario o contraseña incorrectos.");
     }
   };
 
@@ -86,8 +77,17 @@ export default function Protegido({ children }) {
       <main>
         <form className="glass-panel login-panel" onSubmit={entrar}>
           <h2>Ingresar</h2>
-          <p className="ayuda">Usá la contraseña de prueba que te compartieron.</p>
+          <p className="ayuda">Usá el usuario y la contraseña de prueba que te compartieron.</p>
 
+          <label>
+            Usuario
+            <input
+              value={usuario}
+              onChange={e => setUsuario(e.target.value)}
+              autoFocus
+              required
+            />
+          </label>
           <label>
             Contraseña
             <input
@@ -95,16 +95,13 @@ export default function Protegido({ children }) {
               autoComplete="current-password"
               value={clave}
               onChange={e => setClave(e.target.value)}
-              autoFocus
               required
             />
           </label>
 
           {error && <div className="error-alert">{error}</div>}
 
-          <button className="btn-primary ancho-total" type="submit" disabled={verificando}>
-            {verificando ? "Verificando…" : "Entrar"}
-          </button>
+          <button className="btn-primary ancho-total" type="submit">Entrar</button>
         </form>
       </main>
     </div>
